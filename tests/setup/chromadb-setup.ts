@@ -95,14 +95,7 @@ export class ChromaDBTestServer {
 let globalTestServer: ChromaDBTestServer | null = null;
 
 export async function setupChromaDBForTests(): Promise<void> {
-  // Check if we should use real ChromaDB or mocks
-  const useRealChromaDB = process.env.LLMEM_TEST_REAL_CHROMADB === 'true';
-  
-  if (!useRealChromaDB) {
-    console.log('Using ChromaDB mocks for unit tests');
-    return;
-  }
-
+  // This is only called by integration tests
   console.log('Setting up real ChromaDB for integration tests');
   
   if (!globalTestServer) {
@@ -127,6 +120,3 @@ export async function teardownChromaDBForTests(): Promise<void> {
   }
 }
 
-export function isUsingRealChromaDB(): boolean {
-  return process.env.LLMEM_TEST_REAL_CHROMADB === 'true' && globalTestServer?.isRunning() === true;
-}

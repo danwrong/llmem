@@ -5,6 +5,9 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['**/*.test.ts'],
+    env: {
+      NODE_ENV: 'test'
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -17,9 +20,8 @@ export default defineConfig({
         'tests/setup/**',
       ],
     },
-    testTimeout: 30000, // Increased for ChromaDB startup
+    testTimeout: 30000,
     hookTimeout: 30000,
     setupFiles: ['tests/setup/test-setup.ts'],
-    globalSetup: ['tests/setup/global-setup.ts'],
   },
 });
