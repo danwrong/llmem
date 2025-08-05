@@ -49,16 +49,7 @@ export class LLMemMCPServer {
             properties: {
               query: {
                 type: 'string',
-                description: 'Natural language search query about what to remember or recall (e.g., "tell me about X", "what do you remember about Y")',
-              },
-              type: {
-                type: 'string',
-                description: 'Filter by memory type/directory path (e.g., "personal", "work/2024", "travel/japan") - optional',
-              },
-              tags: {
-                type: 'array',
-                items: { type: 'string' },
-                description: 'Filter by specific tags or topics - optional',
+                description: 'Natural language search query. Can include any context like "my travel memories from Japan", "work projects from last year", "recipes with chocolate", etc. The semantic search will find relevant memories based on meaning.',
               },
               limit: {
                 type: 'number',
@@ -154,7 +145,7 @@ export class LLMemMCPServer {
         },
         {
           name: 'list_contexts',
-          description: 'List all stored memories with optional filtering. Use to browse or overview what has been remembered.',
+          description: 'List memories with optional filtering by exact type/directory path. Use for browsing by organization structure (e.g., all memories in "work/2024") rather than semantic search.',
           inputSchema: {
             type: 'object',
             properties: {

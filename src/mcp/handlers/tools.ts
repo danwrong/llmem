@@ -38,28 +38,14 @@ export class ToolHandlers {
   }
 
   private async handleSearchContext(args: any): Promise<CallToolResult> {
-    const { query, type, tags, limit = 10 } = args;
+    const { query, limit = 10 } = args;
 
     if (!query || typeof query !== 'string') {
       throw new McpError(ErrorCode.InvalidParams, 'Query parameter is required and must be a string');
     }
 
-    const results = await this.contextStore.search(query);
-    
-    // Apply additional filters if provided
-    let filteredResults = results;
-    
-    if (type) {
-      filteredResults = filteredResults.filter(ctx => ctx.metadata.type === type);
-    }
-    
-    if (tags && Array.isArray(tags)) {
-      filteredResults = filteredResults.filter(ctx =>
-        tags.every(tag => ctx.metadata.tags.includes(tag))
-      );
-    }
-
-    const limitedResults = filteredResults.slice(0, limit);
+    // Let vector search handle all the semantic filtering
+    const results = await this.contextStore.search(query, { limit });
 
     return {
       content: [
@@ -67,8 +53,8 @@ export class ToolHandlers {
           type: 'text',
           text: JSON.stringify({
             query,
-            total_results: filteredResults.length,
-            results: limitedResults.map(ctx => ({
+            total_results: results.length,
+            memories: results.map(ctx => ({
               id: ctx.metadata.id,
               title: ctx.metadata.title,
               type: ctx.metadata.type,
