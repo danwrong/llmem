@@ -126,7 +126,13 @@ Retrieves the full content of a specific memory
 ```
 Add a new personal memory titled "Workspace Setup" with information about my preferred development environment, including VS Code settings, terminal setup, and favorite extensions
 ```
-Creates a new markdown file in your memory store
+Creates a new markdown file in your memory store. The LLM will intelligently organize it in an appropriate subdirectory (e.g., `contexts/tech/development/` or `contexts/2024/setup/`)
+
+#### Add Memory with Custom Organization
+```
+Remember my trip to Tokyo in December 2024 - the amazing ramen at Ichiran, visiting Senso-ji temple, and staying in Shibuya
+```
+The LLM will automatically organize this in a logical directory like `contexts/travel/japan/2024/` or `contexts/2024/december/tokyo/`
 
 #### Update Existing Memory
 ```

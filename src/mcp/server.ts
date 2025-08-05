@@ -86,7 +86,7 @@ export class LLMemMCPServer {
         },
         {
           name: 'add_context',
-          description: 'Store a new memory or piece of information for future recall. Use when the user wants to remember or save something.',
+          description: 'Store a new memory or piece of information for future recall. Use when the user wants to remember or save something. The tool intelligently organizes memories in subdirectories based on content (e.g., "travel/2024/paris" for a trip memory). You can override the default organization by specifying a custom directory path.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -105,7 +105,7 @@ export class LLMemMCPServer {
               },
               directory: {
                 type: 'string',
-                description: 'Optional subdirectory within contexts/ for organization (e.g., "work/2024", "travel", "recipes"). If not specified, uses type as directory.',
+                description: 'Optional subdirectory path for organizing this memory (e.g., "2024/january", "work/project-x", "travel/japan", "recipes/desserts"). Use forward slashes for nested directories. The LLM should intelligently choose directories based on the content - for example, a memory about a trip to Tokyo could go in "travel/japan/2024" or "2024/travel/tokyo". If not specified, defaults to the memory type (personal/project/knowledge/conversation).',
               },
               tags: {
                 type: 'array',
