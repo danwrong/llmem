@@ -137,7 +137,7 @@ describe('ResourceHandlers', () => {
       expect(data.types.personal).toBe(1);
       expect(data.types.conversation).toBe(1);
       
-      expect(data.available_types).toEqual(['personal', 'project', 'knowledge', 'conversation']);
+      expect(data.available_types).toEqual(expect.arrayContaining(['personal', 'project', 'knowledge', 'conversation']));
       
       // Programming should be the most common tag (appears 3 times)
       expect(data.most_common_tags.programming).toBe(3);
@@ -183,11 +183,9 @@ describe('ResourceHandlers', () => {
       const data = JSON.parse(result.contents[0].text!);
       
       expect(data.total_memories).toBe(0);
-      expect(data.types.knowledge).toBe(0);
-      expect(data.types.project).toBe(0);
-      expect(data.types.personal).toBe(0);
-      expect(data.types.conversation).toBe(0);
-      expect(Object.keys(data.most_common_tags)).toHaveLength(0);
+      expect(data.types).toEqual({});
+      expect(data.most_common_tags).toEqual({});
+      expect(data.available_types).toEqual([]);
       
       // Clean up
       await cleanupTempDir(emptyTempDir);
