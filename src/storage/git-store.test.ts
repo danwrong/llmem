@@ -37,11 +37,11 @@ describe('GitStore', () => {
     it('should create initial directory structure', async () => {
       await gitStore.initialize();
       
-      expect(existsSync(join(tempDir, 'contexts/daily'))).toBe(true);
-      expect(existsSync(join(tempDir, 'contexts/people'))).toBe(true);
-      expect(existsSync(join(tempDir, 'contexts/projects'))).toBe(true);
-      expect(existsSync(join(tempDir, 'contexts/knowledge'))).toBe(true);
+      // Should create minimal structure - flexible directories created on demand
+      expect(existsSync(join(tempDir, 'contexts'))).toBe(true);
       expect(existsSync(join(tempDir, '.llmem/cache'))).toBe(true);
+      expect(existsSync(join(tempDir, '.gitignore'))).toBe(true);
+      expect(existsSync(join(tempDir, 'README.md'))).toBe(true);
     });
 
     it('should not reinitialize if already initialized', async () => {

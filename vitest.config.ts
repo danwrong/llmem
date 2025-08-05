@@ -14,9 +14,12 @@ export default defineConfig({
         '**/*.test.ts',
         '**/*.config.ts',
         'src/scripts/**',
+        'tests/setup/**',
       ],
     },
-    testTimeout: 10000,
-    hookTimeout: 10000,
+    testTimeout: 30000, // Increased for ChromaDB startup
+    hookTimeout: 30000,
+    setupFiles: ['tests/setup/test-setup.ts'],
+    globalSetup: ['tests/setup/global-setup.ts'],
   },
 });

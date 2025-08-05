@@ -1,41 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ContextStore } from '../src/storage/context-store.js';
-import { ContextType } from '../src/models/context.js';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { mkdtemp, rm } from 'fs/promises';
 
-// Mock the vector-related modules
-vi.mock('chromadb', () => ({
-  ChromaApi: vi.fn().mockImplementation(() => ({
-    createCollection: vi.fn().mockResolvedValue({
-      add: vi.fn().mockResolvedValue(undefined),
-      query: vi.fn().mockResolvedValue({
-        ids: [[]],
-        metadatas: [[]],
-        distances: [[]],
-        documents: [[]]
-      }),
-      delete: vi.fn().mockResolvedValue(undefined),
-      count: vi.fn().mockResolvedValue(0)
-    }),
-    getCollection: vi.fn().mockRejectedValue(new Error('Collection not found')),
-    deleteCollection: vi.fn().mockResolvedValue(undefined)
-  }))
-}));
+// Import test environment setup
+import { setupTestMocks } from './setup/test-environment.js';
 
-vi.mock('@xenova/transformers', () => ({
-  pipeline: vi.fn().mockResolvedValue((text: string) => ({
-    data: new Float32Array([0.1, 0.2, 0.3, 0.4, 0.5])
-  }))
-}));
+// Setup mocks
+setupTestMocks();
 
-vi.mock('chokidar', () => ({
-  watch: vi.fn().mockReturnValue({
-    on: vi.fn().mockReturnThis(),
-    close: vi.fn()
-  })
-}));
 
 describe('ContextStore with Vector Search', () => {
   let contextStore: ContextStore;
@@ -61,8 +35,8 @@ describe('ContextStore with Vector Search', () => {
     });
 
     it('should handle vector store initialization failure gracefully', async () => {
-      const { ChromaApi } = await import('chromadb');
-      vi.mocked(ChromaApi).mockImplementationOnce(() => {
+      const { ChromaClient } = await import('chromadb');
+      vi.mocked(ChromaClient).mockImplementationOnce(() => {
         throw new Error('ChromaDB initialization failed');
       });
 

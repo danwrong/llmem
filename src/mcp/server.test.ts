@@ -99,9 +99,9 @@ describe('LLMemMCPServer E2E', () => {
       const addData = JSON.parse(addResult.content[0].text);
       
       expect(addData.success).toBe(true);
-      expect(addData.context.title).toBe('E2E Test Context');
+      expect(addData.memory.title).toBe('E2E Test Context');
       
-      const contextId = addData.context.id;
+      const contextId = addData.memory.id;
 
       // Retrieve the context
       const getRequest = {
@@ -132,8 +132,8 @@ describe('LLMemMCPServer E2E', () => {
       const searchResult = await toolHandlers.handleToolCall(searchRequest);
       const searchData = JSON.parse(searchResult.content[0].text);
       
-      expect(searchData.results).toHaveLength(1);
-      expect(searchData.results[0].id).toBe(contextId);
+      expect(searchData.memories).toHaveLength(1);
+      expect(searchData.memories[0].id).toBe(contextId);
 
       // Update the context
       const updateRequest = {
@@ -152,7 +152,7 @@ describe('LLMemMCPServer E2E', () => {
       const updateData = JSON.parse(updateResult.content[0].text);
       
       expect(updateData.success).toBe(true);
-      expect(updateData.context.title).toBe('Updated E2E Test Context');
+      expect(updateData.memory.title).toBe('Updated E2E Test Context');
 
       // List contexts
       const listRequest = {
@@ -166,7 +166,7 @@ describe('LLMemMCPServer E2E', () => {
       const listResult = await toolHandlers.handleToolCall(listRequest);
       const listData = JSON.parse(listResult.content[0].text);
       
-      expect(listData.contexts.some((ctx: any) => ctx.id === contextId)).toBe(true);
+      expect(listData.memories.some((ctx: any) => ctx.id === contextId)).toBe(true);
 
       // Delete the context
       const deleteRequest = {
@@ -235,8 +235,8 @@ describe('LLMemMCPServer E2E', () => {
       const recentResult = await resourceHandlers.handleResourceRead(recentRequest);
       const recentData = JSON.parse(recentResult.contents[0].text);
       
-      expect(recentData.recent_contexts).toHaveLength(2);
-      expect(recentData.total_contexts).toBe(2);
+      expect(recentData.recent_memories).toHaveLength(2);
+      expect(recentData.total_memories).toBe(2);
 
       // Test context types resource
       const typesRequest = {
@@ -247,7 +247,7 @@ describe('LLMemMCPServer E2E', () => {
       const typesResult = await resourceHandlers.handleResourceRead(typesRequest);
       const typesData = JSON.parse(typesResult.contents[0].text);
       
-      expect(typesData.total_contexts).toBe(2);
+      expect(typesData.total_memories).toBe(2);
       expect(typesData.types.knowledge).toBe(1);
       expect(typesData.types.project).toBe(1);
       expect(typesData.most_common_tags['resource-test']).toBe(2);
@@ -311,7 +311,7 @@ describe('LLMemMCPServer E2E', () => {
         },
       });
 
-      const contextId = JSON.parse(addResult.content[0].text).context.id;
+      const contextId = JSON.parse(addResult.content[0].text).memory.id;
 
       // Create new server instance with same directory
       const server2 = new LLMemMCPServer(tempDir);
