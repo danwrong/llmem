@@ -205,12 +205,12 @@ describe('ToolHandlers', () => {
       const data = JSON.parse(result.content[0].text!);
       
       expect(data.success).toBe(true);
-      expect(data.context.title).toBe('New Context');
-      expect(data.context.type).toBe('knowledge');
-      expect(data.context.tags).toEqual(['test']);
+      expect(data.memory.title).toBe('New Context');
+      expect(data.memory.type).toBe('knowledge');
+      expect(data.memory.tags).toEqual(['test']);
       
       // Verify it was actually created
-      const created = await contextStore.read(data.context.id);
+      const created = await contextStore.read(data.memory.id);
       expect(created).not.toBeNull();
       expect(created!.content).toBe('New content');
     });
@@ -270,8 +270,8 @@ describe('ToolHandlers', () => {
       const data = JSON.parse(result.content[0].text!);
       
       expect(data.success).toBe(true);
-      expect(data.context.title).toBe('Updated Title');
-      expect(data.context.tags).toEqual(['updated']);
+      expect(data.memory.title).toBe('Updated Title');
+      expect(data.memory.tags).toEqual(['updated']);
       
       // Verify the update
       const updated = await contextStore.read(created.metadata.id);
@@ -352,8 +352,8 @@ describe('ToolHandlers', () => {
       const result = await toolHandlers.handleToolCall(request);
       const data = JSON.parse(result.content[0].text!);
       
-      expect(data.total_contexts).toBe(3);
-      expect(data.contexts).toHaveLength(3);
+      expect(data.total_memories).toBe(3);
+      expect(data.memories).toHaveLength(3);
     });
 
     it('should filter by type', async () => {
@@ -369,7 +369,7 @@ describe('ToolHandlers', () => {
       const data = JSON.parse(result.content[0].text!);
       
       expect(data.showing).toBe(2);
-      expect(data.contexts.every((ctx: any) => ctx.type === 'knowledge')).toBe(true);
+      expect(data.memories.every((ctx: any) => ctx.type === 'knowledge')).toBe(true);
     });
 
     it('should respect limit', async () => {
@@ -385,7 +385,7 @@ describe('ToolHandlers', () => {
       const data = JSON.parse(result.content[0].text!);
       
       expect(data.showing).toBe(1);
-      expect(data.total_contexts).toBe(3);
+      expect(data.total_memories).toBe(3);
     });
   });
 });

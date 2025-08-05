@@ -36,7 +36,7 @@ export class FileWatcher {
         console.error('File watcher error:', error);
       });
 
-    console.log(`File watcher started monitoring: ${contextsPath}`);
+    console.warn(`File watcher started monitoring: ${contextsPath}`);
   }
 
   stop(): void {

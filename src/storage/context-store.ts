@@ -2,6 +2,7 @@ import { readFile, writeFile, unlink, readdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { GitStore } from './git-store.js';
+import { RemoteGitStore } from './remote-git-store.js';
 import { MarkdownParser } from './markdown-parser.js';
 import { VectorStore } from './vector-store.js';
 import { HybridSearch, SearchResult } from './hybrid-search.js';
@@ -10,15 +11,20 @@ import { Context, ContextMetadata, ContextType } from '../models/context.js';
 import { getConfig } from '../utils/config.js';
 
 export class ContextStore {
-  private gitStore: GitStore;
+  private gitStore: GitStore | RemoteGitStore;
   private parser: MarkdownParser;
   private vectorStore: VectorStore;
   private hybridSearch: HybridSearch;
   private fileWatcher: FileWatcher;
   private config = getConfig();
+  private backgroundSyncInterval?: NodeJS.Timeout;
 
   constructor(storePath?: string) {
-    this.gitStore = new GitStore(storePath);
+    // Use RemoteGitStore if remote URL is configured, otherwise use GitStore
+    this.gitStore = this.config.remoteUrl 
+      ? new RemoteGitStore(storePath) 
+      : new GitStore(storePath);
+    
     this.parser = new MarkdownParser();
     this.vectorStore = new VectorStore();
     this.hybridSearch = new HybridSearch(this.vectorStore);
@@ -27,6 +33,11 @@ export class ContextStore {
 
   async initialize(): Promise<void> {
     await this.gitStore.initialize();
+
+    // Pull latest changes from remote if configured
+    if (this.config.remoteUrl && this.gitStore instanceof RemoteGitStore) {
+      await this.gitStore.pull();
+    }
     
     // Initialize vector store
     try {
@@ -37,14 +48,19 @@ export class ContextStore {
       const stats = await this.vectorStore.getStats();
       
       if (stats.totalVectors === 0 && contexts.length > 0) {
-        console.log('Rebuilding vector search index...');
+        console.warn('Rebuilding vector search index...');
         await this.hybridSearch.rebuildIndex(contexts);
-        console.log(`Indexed ${contexts.length} contexts for vector search`);
+        console.warn(`Indexed ${contexts.length} memories for vector search`);
       }
 
       // Start file watcher for auto-indexing
       if (this.config.autoIndex !== false) { // Default to true
         this.fileWatcher.start();
+      }
+
+      // Start background sync if remote is configured
+      if (this.config.remoteUrl && this.config.autoSync) {
+        this.startBackgroundSync();
       }
     } catch (error) {
       console.warn('Vector search initialization failed, using text search only:', error);
@@ -62,16 +78,16 @@ export class ContextStore {
     
     await this.writeContext(filepath, context);
     
-    // Add to vector index
+    // Add memory to vector index
     try {
       await this.hybridSearch.addContext({ ...context, filepath });
     } catch (error) {
-      console.warn('Failed to add context to vector index:', error);
+      console.warn('Failed to add memory to vector index:', error);
     }
     
     if (this.config.autoCommit) {
       await this.gitStore.add(filepath);
-      await this.gitStore.commit(`Add context: ${title}`);
+      await this.gitStore.commit(`Add memory: ${title}`);
     }
 
     return { ...context, filepath };
@@ -101,16 +117,16 @@ export class ContextStore {
 
     await this.writeContext(existing.filepath, updated);
 
-    // Update vector index
+    // Update memory in vector index
     try {
       await this.hybridSearch.updateContext(updated);
     } catch (error) {
-      console.warn('Failed to update context in vector index:', error);
+      console.warn('Failed to update memory in vector index:', error);
     }
 
     if (this.config.autoCommit) {
       await this.gitStore.add(existing.filepath);
-      await this.gitStore.commit(`Update context: ${updated.metadata.title}`);
+      await this.gitStore.commit(`Update memory: ${updated.metadata.title}`);
     }
 
     return updated;
@@ -123,16 +139,16 @@ export class ContextStore {
     const context = await this.read(id);
     await unlink(filepath);
 
-    // Remove from vector index
+    // Remove memory from vector index
     try {
       await this.hybridSearch.removeContext(id);
     } catch (error) {
-      console.warn('Failed to remove context from vector index:', error);
+      console.warn('Failed to remove memory from vector index:', error);
     }
 
     if (this.config.autoCommit && context) {
       await this.gitStore.add(filepath);
-      await this.gitStore.commit(`Delete context: ${context.metadata.title}`);
+      await this.gitStore.commit(`Delete memory: ${context.metadata.title}`);
     }
 
     return true;
@@ -300,5 +316,62 @@ export class ContextStore {
 
   async getVectorStats(): Promise<{ totalVectors: number }> {
     return await this.hybridSearch.getStats();
+  }
+
+  // Remote sync management
+  private startBackgroundSync(): void {
+    if (this.backgroundSyncInterval) {
+      clearInterval(this.backgroundSyncInterval);
+    }
+
+    const intervalMs = this.config.syncInterval * 60 * 1000; // Convert minutes to milliseconds
+    
+    this.backgroundSyncInterval = setInterval(async () => {
+      try {
+        if (this.gitStore instanceof RemoteGitStore) {
+          await this.gitStore.pull();
+        }
+      } catch (error) {
+        console.warn('Background sync failed:', error);
+      }
+    }, intervalMs);
+
+    console.warn(`🔄 Started background sync (every ${this.config.syncInterval} minutes)`);
+  }
+
+  stopBackgroundSync(): void {
+    if (this.backgroundSyncInterval) {
+      clearInterval(this.backgroundSyncInterval);
+      this.backgroundSyncInterval = undefined;
+      console.warn('⏹️ Stopped background sync');
+    }
+  }
+
+  async syncWithRemote(): Promise<void> {
+    if (this.gitStore instanceof RemoteGitStore) {
+      await this.gitStore.sync();
+      
+      // Rebuild vector index after sync in case files changed
+      try {
+        const contexts = await this.list();
+        const stats = await this.vectorStore.getStats();
+        
+        if (stats.totalVectors !== contexts.length) {
+          console.warn('🔄 Rebuilding vector index after sync...');
+          await this.hybridSearch.rebuildIndex(contexts);
+          console.warn(`✅ Reindexed ${contexts.length} memories after sync`);
+        }
+      } catch (error) {
+        console.warn('Failed to rebuild vector index after sync:', error);
+      }
+    } else {
+      console.warn('No remote repository configured');
+    }
+  }
+
+  // Cleanup method for graceful shutdown
+  async cleanup(): Promise<void> {
+    this.stopBackgroundSync();
+    this.stopFileWatcher();
   }
 }

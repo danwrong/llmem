@@ -38,7 +38,7 @@ export function createMockContext(overrides?: Partial<Context>): Context {
 }
 
 export function createMockMarkdown(metadata?: Partial<ContextMetadata>): string {
-  const context = createMockContext({ metadata });
+  const context = createMockContext(metadata ? { metadata: { ...createMockContext().metadata, ...metadata } } : undefined);
   const { metadata: meta, content } = context;
   
   return `---

@@ -1,17 +1,10 @@
 import matter from 'gray-matter';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkStringify from 'remark-stringify';
 import { Context, ContextMetadata, ContextMetadataSchema } from '../models/context.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export class MarkdownParser {
-  private processor;
-
   constructor() {
-    this.processor = unified()
-      .use(remarkParse)
-      .use(remarkStringify);
+    // Unified processor for markdown parsing initialized
   }
 
   parse(markdownContent: string, filepath?: string): Context {

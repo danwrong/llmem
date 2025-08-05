@@ -1,11 +1,11 @@
-# LLMem - Personal Context Store
+# LLMem - Personal Memory Store
 
-A local-first personal memory system that provides LLMs with searchable access to your personal context through an MCP (Model Context Protocol) server.
+A local-first personal memory system that provides LLMs with searchable access to your personal memories through an MCP (Model Context Protocol) server.
 
 ## Features
 
-- 📝 **Markdown-based storage** - Your contexts are stored as plain markdown files with YAML frontmatter
-- 🔍 **Searchable** - Full-text search across all your personal contexts
+- 📝 **Markdown-based storage** - Your memories are stored as plain markdown files with YAML frontmatter
+- 🔍 **Searchable** - Full-text search across all your personal memories
 - 🗂️ **Git-backed** - Automatic version control with commit history
 - 🤖 **MCP Integration** - Direct access from Claude Desktop and other MCP-compatible clients
 - 🔒 **Local-first** - Your data stays on your device
@@ -27,9 +27,9 @@ npm run build
 
 ## Quick Start
 
-### 1. Initialize Your Context Store
+### 1. Initialize Your Memory Store
 
-The context store will be automatically created at `~/context-store/` when you first run the server.
+The memory store will be automatically created at `~/context-store/` when you first run the server.
 
 ### 2. Start the MCP Server
 
@@ -38,13 +38,13 @@ npm run mcp
 ```
 
 The server will:
-- Create the context store directory if it doesn't exist
+- Create the memory store directory if it doesn't exist
 - Initialize a git repository for version control
 - Start listening for MCP commands via stdio
 
-### 3. Add Some Contexts
+### 3. Add Some Memories
 
-You can add contexts manually by creating markdown files in `~/context-store/contexts/`:
+You can add memories manually by creating markdown files in `~/context-store/contexts/`:
 
 ```markdown
 ---
@@ -98,51 +98,51 @@ What MCP tools do you have access to?
 ```
 Claude should list the 6 LLMem tools (search_context, get_context, add_context, etc.)
 
-#### Search Your Contexts
+#### Search Your Memories
 ```
-Search my contexts for "coffee"
+Search my memories for "coffee"
 ```
 This will search across all your markdown files for the term "coffee"
 
-#### Browse Recent Contexts
+#### Browse Recent Memories
 ```
-Show me my recent contexts
+Show me my recent memories
 ```
-This displays your most recently modified contexts
+This displays your most recently modified memories
 
-#### View Context Statistics
+#### View Memory Statistics
 ```
-What types of contexts do I have and how many of each?
+What types of memories do I have and how many of each?
 ```
 Shows breakdown by type (personal, project, knowledge, conversation) and common tags
 
-#### Retrieve Specific Context
+#### Retrieve Specific Memory
 ```
-Get the context titled "My Coffee Preferences"
+Get the memory titled "My Coffee Preferences"
 ```
-Retrieves the full content of a specific context
+Retrieves the full content of a specific memory
 
-#### Add New Context
+#### Add New Memory
 ```
-Add a new personal context titled "Workspace Setup" with information about my preferred development environment, including VS Code settings, terminal setup, and favorite extensions
+Add a new personal memory titled "Workspace Setup" with information about my preferred development environment, including VS Code settings, terminal setup, and favorite extensions
 ```
-Creates a new markdown file in your context store
+Creates a new markdown file in your memory store
 
-#### Update Existing Context
+#### Update Existing Memory
 ```
-Update my "TypeScript Best Practices" context to include information about type guards and assertion functions
+Update my "TypeScript Best Practices" memory to include information about type guards and assertion functions
 ```
-Modifies an existing context while preserving its ID and creation date
+Modifies an existing memory while preserving its ID and creation date
 
-#### List Contexts by Type
+#### List Memories by Type
 ```
-Show me all my project contexts
+Show me all my project memories
 ```
-Filters contexts to show only those of a specific type
+Filters memories to show only those of a specific type
 
 #### Complex Searches
 ```
-Search for contexts about "typescript" that are tagged with "programming"
+Search for memories about "typescript" that are tagged with "programming"
 ```
 Demonstrates filtered search with both query and tag constraints
 
@@ -160,51 +160,51 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | npm run mcp
 echo '{"jsonrpc":"2.0","id":2,"method":"resources/list","params":{}}' | npm run mcp
 ```
 
-### Search Contexts
+### Search Memories
 ```bash
 echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"search_context","arguments":{"query":"coffee"}}}' | npm run mcp
 ```
 
-### Get a Specific Context
+### Get a Specific Memory
 ```bash
 echo '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"get_context","arguments":{"id":"550e8400-e29b-41d4-a716-446655440001"}}}' | npm run mcp
 ```
 
-### List All Contexts
+### List All Memories
 ```bash
 echo '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"list_contexts","arguments":{}}}' | npm run mcp
 ```
 
-### Read Recent Contexts Resource
+### Read Recent Memories Resource
 ```bash
 echo '{"jsonrpc":"2.0","id":6,"method":"resources/read","params":{"uri":"context://recent"}}' | npm run mcp
 ```
 
-### Read Context Types Resource
+### Read Memory Types Resource
 ```bash
 echo '{"jsonrpc":"2.0","id":7,"method":"resources/read","params":{"uri":"context://types"}}' | npm run mcp
 ```
 
-### Add a New Context
+### Add a New Memory
 ```bash
-echo '{"jsonrpc":"2.0","id":8,"method":"tools/call","params":{"name":"add_context","arguments":{"title":"Test from Console","content":"This is a test context created from the console","type":"knowledge","tags":["test","console"]}}}' | npm run mcp
+echo '{"jsonrpc":"2.0","id":8,"method":"tools/call","params":{"name":"add_context","arguments":{"title":"Test from Console","content":"This is a test memory created from the console","type":"knowledge","tags":["test","console"]}}}' | npm run mcp
 ```
 
 ## Available MCP Tools
 
-- **search_context** - Search through contexts using natural language or keywords
-- **get_context** - Retrieve a specific context by ID
-- **add_context** - Create a new context entry
-- **update_context** - Modify an existing context
-- **delete_context** - Remove a context
-- **list_contexts** - Browse contexts with optional filtering
+- **search_context** - Search through memories using natural language or keywords
+- **get_context** - Retrieve a specific memory by ID
+- **add_context** - Create a new memory entry
+- **update_context** - Modify an existing memory
+- **delete_context** - Remove a memory
+- **list_contexts** - Browse memories with optional filtering
 
 ## Available MCP Resources
 
-- **context://recent** - Recently modified contexts
-- **context://types** - Context type statistics and tag counts
+- **context://recent** - Recently modified memories
+- **context://types** - Memory type statistics and tag counts
 
-## Context Types
+## Memory Types
 
 - **personal** - Personal information and preferences
 - **project** - Project-specific notes and documentation
@@ -245,8 +245,80 @@ llmem/
 │   │   └── markdown-parser.ts
 │   ├── models/        # TypeScript types and schemas
 │   └── index.ts       # Entry point
-├── context-store/     # Your personal contexts (auto-created)
+├── context-store/     # Your personal memories (auto-created)
 └── tests/            # Test files
+```
+
+## Configuration
+
+LLMem can be configured using environment variables or a `.env` file in the project root.
+
+### Configuration Options
+
+Create a `.env` file (copy from `.env.example`) and modify as needed:
+
+```bash
+# Storage Configuration
+LLMEM_STORE_PATH=/path/to/your/memories      # Where memories are stored (default: ~/context-store)
+LLMEM_VECTOR_DB_PATH=/custom/vectors.db      # Vector database location (default: {STORE_PATH}/.llmem/vectors.db)
+LLMEM_CHROMA_PORT=8765                       # ChromaDB port (default: 8765)
+
+# Model Configuration
+LLMEM_EMBEDDING_MODEL=Xenova/all-MiniLM-L6-v2  # Embedding model for vector search (default: Xenova/all-MiniLM-L6-v2)
+
+# Remote Repository Configuration  
+LLMEM_REMOTE_URL=git@github.com:user/repo.git  # Git remote URL (no default - local only if not set)
+LLMEM_AUTH_TYPE=ssh                          # Authentication method: 'ssh' or 'token' (default: ssh if remote set)
+LLMEM_AUTH_TOKEN=ghp_your_pat_here          # GitHub Personal Access Token for HTTPS auth (required if auth_type=token)
+
+# Sync Configuration
+LLMEM_AUTO_SYNC=true                        # Auto-sync with remote repository (default: true if remote set)
+LLMEM_SYNC_INTERVAL=5                       # Background sync interval in minutes (default: 5)
+
+# Behavior Configuration  
+LLMEM_AUTO_COMMIT=true                      # Auto-commit changes to git (default: true)
+LLMEM_AUTO_INDEX=true                       # Auto-index files for vector search (default: true)
+```
+
+### Configuration Details
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `LLMEM_STORE_PATH` | string | `~/context-store` | Directory where memories are stored |
+| `LLMEM_VECTOR_DB_PATH` | string | `{STORE_PATH}/.llmem/vectors.db` | Path to vector database file |
+| `LLMEM_CHROMA_PORT` | number | `8765` | Port for ChromaDB server |
+| `LLMEM_EMBEDDING_MODEL` | string | `Xenova/all-MiniLM-L6-v2` | HuggingFace model for embeddings |
+| `LLMEM_REMOTE_URL` | string | none | Git repository URL for syncing |
+| `LLMEM_AUTH_TYPE` | `ssh\|token` | `ssh` | Authentication method for remote repo |
+| `LLMEM_AUTH_TOKEN` | string | none | Personal access token for HTTPS auth |
+| `LLMEM_AUTO_SYNC` | boolean | `true` | Enable automatic sync with remote |
+| `LLMEM_SYNC_INTERVAL` | number | `5` | Minutes between background syncs |
+| `LLMEM_AUTO_COMMIT` | boolean | `true` | Auto-commit changes to git |
+| `LLMEM_AUTO_INDEX` | boolean | `true` | Auto-index files for search |
+
+### Remote Repository Setup
+
+LLMem supports syncing your memories with a Git repository:
+
+1. **First-time setup**: When you set `LLMEM_REMOTE_URL`, your local memories will be completely replaced with the remote repository content.
+
+2. **Automatic sync**: All memory operations (create, update, delete) automatically push to the remote repository.
+
+3. **Background sync**: Automatically pulls remote changes every N minutes (configurable).
+
+4. **Conflict resolution**: Automatically resolves conflicts by preferring the remote version while backing up local changes to `.llmem/conflicts/`.
+
+**SSH Authentication** (recommended):
+```bash
+LLMEM_REMOTE_URL=git@github.com:username/memories.git
+LLMEM_AUTH_TYPE=ssh
+```
+
+**HTTPS with Personal Access Token**:
+```bash
+LLMEM_REMOTE_URL=https://github.com/username/memories.git
+LLMEM_AUTH_TYPE=token
+LLMEM_AUTH_TOKEN=ghp_your_personal_access_token
 ```
 
 ## Troubleshooting
@@ -262,18 +334,26 @@ llmem/
 - Check that Claude Desktop was fully restarted
 - Test the server manually with the console commands above
 
-### Context Store Issues
+### Memory Store Issues
 - The store is created at `~/context-store/` by default
 - You can change this in `src/utils/config.ts`
 - Make sure you have write permissions in the parent directory
 
-## Future Features
+## Features
 
-- 🔮 Vector search with semantic similarity
-- 👁️ File watcher for auto-indexing external changes
-- 💻 CLI for direct context management
-- ☁️ Optional cloud sync via git remotes
-- 🔐 Encryption for sensitive contexts
+### ✅ Implemented
+- 🔮 **Vector search with semantic similarity** - Using ChromaDB and HuggingFace embeddings
+- 👁️ **File watcher for auto-indexing** - Automatically indexes external file changes  
+- ☁️ **Git remote sync** - Automatic sync with GitHub/GitLab repositories
+- 🔄 **Background sync** - Configurable periodic sync with conflict resolution
+- 🎯 **Memory-focused MCP tools** - Optimized for natural language memory queries
+
+### 🚧 Future Features
+- 💻 CLI for direct memory management
+- 🔐 Encryption for sensitive memories
+- 📊 Memory analytics and insights
+- 🔗 Cross-memory linking and relationships
+- 📱 Mobile companion app
 
 ## License
 

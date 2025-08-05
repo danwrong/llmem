@@ -1,13 +1,13 @@
-import simpleGit, { SimpleGit } from 'simple-git';
+import { simpleGit, SimpleGit } from 'simple-git';
 import { mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { getConfig } from '../utils/config.js';
 
 export class GitStore {
-  private git: SimpleGit;
-  private storePath: string;
-  private initialized: boolean = false;
+  protected git: SimpleGit;
+  protected storePath: string;
+  protected initialized: boolean = false;
 
   constructor(storePath?: string) {
     this.storePath = storePath || getConfig().storePath;
@@ -111,7 +111,7 @@ export class GitStore {
     await this.git.checkoutLocalBranch(name);
   }
 
-  private async ensureInitialized(): Promise<void> {
+  protected async ensureInitialized(): Promise<void> {
     if (!this.initialized) {
       await this.initialize();
     }

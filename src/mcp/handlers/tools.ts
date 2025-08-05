@@ -22,6 +22,8 @@ export class ToolHandlers {
           return await this.handleDeleteContext(args);
         case 'list_contexts':
           return await this.handleListContexts(args);
+        case 'sync_memories':
+          return await this.handleSyncMemories(args);
         default:
           throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
       }
@@ -92,7 +94,7 @@ export class ToolHandlers {
     const context = await this.contextStore.read(id);
     
     if (!context) {
-      throw new McpError(ErrorCode.InvalidParams, `Context with ID ${id} not found`);
+      throw new McpError(ErrorCode.InvalidParams, `Memory with ID ${id} not found`);
     }
 
     return {
@@ -143,8 +145,8 @@ export class ToolHandlers {
           type: 'text',
           text: JSON.stringify({
             success: true,
-            message: 'Context created successfully',
-            context: {
+            message: 'Memory created successfully',
+            memory: {
               id: newContext.metadata.id,
               title: newContext.metadata.title,
               type: newContext.metadata.type,
@@ -177,7 +179,7 @@ export class ToolHandlers {
     const updatedContext = await this.contextStore.update(id, updates);
     
     if (!updatedContext) {
-      throw new McpError(ErrorCode.InvalidParams, `Context with ID ${id} not found`);
+      throw new McpError(ErrorCode.InvalidParams, `Memory with ID ${id} not found`);
     }
 
     return {
@@ -186,8 +188,8 @@ export class ToolHandlers {
           type: 'text',
           text: JSON.stringify({
             success: true,
-            message: 'Context updated successfully',
-            context: {
+            message: 'Memory updated successfully',
+            memory: {
               id: updatedContext.metadata.id,
               title: updatedContext.metadata.title,
               type: updatedContext.metadata.type,
@@ -210,7 +212,7 @@ export class ToolHandlers {
     const deleted = await this.contextStore.delete(id);
     
     if (!deleted) {
-      throw new McpError(ErrorCode.InvalidParams, `Context with ID ${id} not found`);
+      throw new McpError(ErrorCode.InvalidParams, `Memory with ID ${id} not found`);
     }
 
     return {
@@ -219,7 +221,7 @@ export class ToolHandlers {
           type: 'text',
           text: JSON.stringify({
             success: true,
-            message: 'Context deleted successfully',
+            message: 'Memory deleted successfully',
             id,
           }, null, 2),
         },
@@ -242,9 +244,9 @@ export class ToolHandlers {
         {
           type: 'text',
           text: JSON.stringify({
-            total_contexts: contexts.length,
+            total_memories: contexts.length,
             showing: limitedContexts.length,
-            contexts: limitedContexts.map(ctx => ({
+            memories: limitedContexts.map(ctx => ({
               id: ctx.metadata.id,
               title: ctx.metadata.title,
               type: ctx.metadata.type,
@@ -257,5 +259,38 @@ export class ToolHandlers {
         },
       ],
     };
+  }
+
+  private async handleSyncMemories(_args: any): Promise<CallToolResult> {
+    try {
+      await this.contextStore.syncWithRemote();
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: true,
+              message: 'Successfully synchronized memories with remote repository',
+            }, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              success: false,
+              message: 'Failed to synchronize memories with remote repository',
+              error: errorMessage,
+            }, null, 2),
+          },
+        ],
+      };
+    }
   }
 }

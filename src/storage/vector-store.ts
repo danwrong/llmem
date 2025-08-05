@@ -2,7 +2,6 @@ import { ChromaClient } from 'chromadb';
 import { pipeline, FeatureExtractionPipeline } from '@xenova/transformers';
 import { Context } from '../models/context.js';
 import { getConfig } from '../utils/config.js';
-import { join } from 'path';
 
 export interface VectorSearchResult {
   context: Context;
@@ -19,13 +18,13 @@ export class VectorStore {
 
   async initialize(): Promise<void> {
     try {
-      console.log('Initializing ChromaDB vector store...');
+      console.warn('Initializing ChromaDB vector store...');
       
       // Initialize ChromaDB client with modern configuration
       const { ChromaClient } = await import('chromadb');
       this.client = new ChromaClient({
         host: 'localhost',
-        port: 8000
+        port: this.config.chromaDbPort
       });
 
       // Initialize local embeddings with Transformers.js
@@ -39,26 +38,19 @@ export class VectorStore {
       try {
         // Delete existing collection if it exists
         await this.client.deleteCollection({ name: 'contexts' });
-        console.log('🗑️ Deleted existing ChromaDB collection');
+        console.warn('🗑️ Deleted existing ChromaDB collection');
       } catch (error) {
         // Collection might not exist, that's fine
       }
 
-      // Create new collection with proper embedding function configuration
+      // Create new collection
       this.collection = await this.client.createCollection({
         name: 'contexts',
-        metadata: { description: 'Personal context embeddings' },
-        embeddingFunction: {
-          embed: async (texts: string[]) => {
-            // ChromaDB requires an embedding function, but we provide embeddings directly
-            // This ensures the collection knows to expect 384-dimensional embeddings
-            return texts.map(() => new Array(384).fill(0));
-          }
-        }
+        metadata: { description: 'Personal context embeddings' }
       });
-      console.log('✅ Created new ChromaDB collection with proper embedding configuration');
+      console.warn('✅ Created new ChromaDB collection with proper embedding configuration');
       
-      console.log('✅ ChromaDB vector store initialized successfully');
+      console.warn('✅ ChromaDB vector store initialized successfully');
     } catch (error) {
       console.error('Failed to initialize vector store:', error);
       throw error;
@@ -203,17 +195,10 @@ export class VectorStore {
         // Collection might not exist, that's fine
       }
 
-      // Create new collection with custom embedding function
+      // Create new collection
       this.collection = await this.client.createCollection({
         name: 'contexts',
-        metadata: { description: 'Personal context embeddings' },
-        embeddingFunction: {
-          embed: async (texts: string[]) => {
-            // ChromaDB requires an embedding function, but we'll provide our own embeddings
-            // This is a placeholder that won't be used since we pass embeddings directly
-            return texts.map(() => new Array(384).fill(0)); // 384 is the dimension of all-MiniLM-L6-v2
-          }
-        }
+        metadata: { description: 'Personal context embeddings' }
       });
 
       // Add all contexts

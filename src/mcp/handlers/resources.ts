@@ -11,9 +11,9 @@ export class ResourceHandlers {
     try {
       switch (uri) {
         case 'context://recent':
-          return await this.handleRecentContexts();
+          return await this.handleRecentMemories();
         case 'context://types':
-          return await this.handleContextTypes();
+          return await this.handleMemoryTypes();
         default:
           throw new McpError(ErrorCode.InvalidParams, `Unknown resource URI: ${uri}`);
       }
@@ -28,13 +28,13 @@ export class ResourceHandlers {
     }
   }
 
-  private async handleRecentContexts(): Promise<ReadResourceResult> {
-    // Get all contexts and sort by updated date (already sorted by ContextStore.list())
-    const contexts = await this.contextStore.list();
-    const recentContexts = contexts.slice(0, 10); // Last 10 modified
+  private async handleRecentMemories(): Promise<ReadResourceResult> {
+    // Get all memories and sort by updated date (already sorted by ContextStore.list())
+    const memories = await this.contextStore.list();
+    const recentMemories = memories.slice(0, 10); // Last 10 modified
 
     const result = {
-      recent_contexts: recentContexts.map(ctx => ({
+      recent_memories: recentMemories.map(ctx => ({
         id: ctx.metadata.id,
         title: ctx.metadata.title,
         type: ctx.metadata.type,
@@ -42,8 +42,8 @@ export class ResourceHandlers {
         updated: ctx.metadata.updated,
         content_preview: this.extractPreview(ctx.content),
       })),
-      total_contexts: contexts.length,
-      last_updated: recentContexts.length > 0 ? recentContexts[0].metadata.updated : null,
+      total_memories: memories.length,
+      last_updated: recentMemories.length > 0 ? recentMemories[0].metadata.updated : null,
     };
 
     return {
@@ -57,10 +57,10 @@ export class ResourceHandlers {
     };
   }
 
-  private async handleContextTypes(): Promise<ReadResourceResult> {
-    const contexts = await this.contextStore.list();
+  private async handleMemoryTypes(): Promise<ReadResourceResult> {
+    const memories = await this.contextStore.list();
     
-    // Count contexts by type
+    // Count memories by type
     const typeCounts: Record<ContextType, number> = {
       personal: 0,
       project: 0,
@@ -70,7 +70,7 @@ export class ResourceHandlers {
 
     const tagCounts: Record<string, number> = {};
 
-    contexts.forEach(ctx => {
+    memories.forEach(ctx => {
       typeCounts[ctx.metadata.type]++;
       
       ctx.metadata.tags.forEach(tag => {
@@ -88,7 +88,7 @@ export class ResourceHandlers {
       }, {} as Record<string, number>);
 
     const result = {
-      total_contexts: contexts.length,
+      total_memories: memories.length,
       types: typeCounts,
       most_common_tags: topTags,
       available_types: Object.keys(typeCounts),

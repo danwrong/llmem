@@ -58,13 +58,13 @@ describe('ResourceHandlers', () => {
       expect(result.contents).toHaveLength(1);
       
       const data = JSON.parse(result.contents[0].text!);
-      expect(data.recent_contexts).toHaveLength(3);
-      expect(data.total_contexts).toBe(3);
+      expect(data.recent_memories).toHaveLength(3);
+      expect(data.total_memories).toBe(3);
       expect(data.last_updated).toBeTruthy();
       
       // Should be sorted by most recent first
-      expect(data.recent_contexts[0].title).toBe('Newest Context');
-      expect(data.recent_contexts[0].content_preview).toBe('Newest content');
+      expect(data.recent_memories[0].title).toBe('Newest Context');
+      expect(data.recent_memories[0].content_preview).toBe('Newest content');
     });
 
     it('should limit to 10 recent contexts', async () => {
@@ -84,8 +84,8 @@ describe('ResourceHandlers', () => {
       const result = await resourceHandlers.handleResourceRead(request);
       const data = JSON.parse(result.contents[0].text!);
       
-      expect(data.recent_contexts).toHaveLength(10);
-      expect(data.total_contexts).toBe(15); // 3 from beforeEach + 12 new
+      expect(data.recent_memories).toHaveLength(10);
+      expect(data.total_memories).toBe(15); // 3 from beforeEach + 12 new
     });
 
     it('should include content preview', async () => {
@@ -102,7 +102,7 @@ describe('ResourceHandlers', () => {
       const result = await resourceHandlers.handleResourceRead(request);
       const data = JSON.parse(result.contents[0].text!);
       
-      const longContentItem = data.recent_contexts.find((ctx: any) => ctx.title === 'Long Content');
+      const longContentItem = data.recent_memories.find((ctx: any) => ctx.title === 'Long Content');
       expect(longContentItem).toBeTruthy();
       expect(longContentItem.content_preview.length).toBeLessThan(longContent.length);
       expect(longContentItem.content_preview).toContain('...');
@@ -131,7 +131,7 @@ describe('ResourceHandlers', () => {
       
       const data = JSON.parse(result.contents[0].text!);
       
-      expect(data.total_contexts).toBe(5);
+      expect(data.total_memories).toBe(5);
       expect(data.types.knowledge).toBe(2);
       expect(data.types.project).toBe(1);
       expect(data.types.personal).toBe(1);
@@ -182,7 +182,7 @@ describe('ResourceHandlers', () => {
       const result = await emptyResourceHandlers.handleResourceRead(request);
       const data = JSON.parse(result.contents[0].text!);
       
-      expect(data.total_contexts).toBe(0);
+      expect(data.total_memories).toBe(0);
       expect(data.types.knowledge).toBe(0);
       expect(data.types.project).toBe(0);
       expect(data.types.personal).toBe(0);
@@ -217,7 +217,7 @@ More content here.`;
       const result = await resourceHandlers.handleResourceRead(request);
       const data = JSON.parse(result.contents[0].text!);
       
-      const testContext = data.recent_contexts.find((ctx: any) => ctx.title === 'Markdown Test');
+      const testContext = data.recent_memories.find((ctx: any) => ctx.title === 'Markdown Test');
       expect(testContext.content_preview).not.toContain('**');
       expect(testContext.content_preview).not.toContain('[');
       expect(testContext.content_preview).not.toContain('#');

@@ -43,27 +43,27 @@ export class LLMemMCPServer {
       tools: [
         {
           name: 'search_context',
-          description: 'Search through personal contexts using natural language or keywords',
+          description: 'Search through personal memories and knowledge using natural language queries. Use this when the user asks about remembering, recalling, or finding information about specific topics, people, projects, or experiences.',
           inputSchema: {
             type: 'object',
             properties: {
               query: {
                 type: 'string',
-                description: 'Search query (keywords or natural language)',
+                description: 'Natural language search query about what to remember or recall (e.g., "tell me about X", "what do you remember about Y")',
               },
               type: {
                 type: 'string',
                 enum: ['personal', 'project', 'knowledge', 'conversation'],
-                description: 'Filter by context type (optional)',
+                description: 'Filter by memory type: personal (experiences, thoughts), project (work-related), knowledge (facts, learnings), conversation (past discussions) - optional',
               },
               tags: {
                 type: 'array',
                 items: { type: 'string' },
-                description: 'Filter by tags (optional)',
+                description: 'Filter by specific tags or topics - optional',
               },
               limit: {
                 type: 'number',
-                description: 'Maximum number of results (default: 10)',
+                description: 'Maximum number of memories to return (default: 10)',
                 default: 10,
               },
             },
@@ -72,13 +72,13 @@ export class LLMemMCPServer {
         },
         {
           name: 'get_context',
-          description: 'Retrieve a specific context by its ID',
+          description: 'Retrieve a specific memory by its ID. Use when you need to get the full details of a particular memory.',
           inputSchema: {
             type: 'object',
             properties: {
               id: {
                 type: 'string',
-                description: 'The UUID of the context to retrieve',
+                description: 'The UUID of the memory to retrieve',
               },
             },
             required: ['id'],
@@ -86,22 +86,22 @@ export class LLMemMCPServer {
         },
         {
           name: 'add_context',
-          description: 'Create a new context entry',
+          description: 'Store a new memory or piece of information for future recall. Use when the user wants to remember or save something.',
           inputSchema: {
             type: 'object',
             properties: {
               title: {
                 type: 'string',
-                description: 'Title of the context',
+                description: 'Title or summary of the memory',
               },
               content: {
                 type: 'string',
-                description: 'Markdown content of the context',
+                description: 'Detailed content of the memory in markdown format',
               },
               type: {
                 type: 'string',
                 enum: ['personal', 'project', 'knowledge', 'conversation'],
-                description: 'Type of context',
+                description: 'Type of memory: personal (experiences, thoughts), project (work-related), knowledge (facts, learnings), conversation (past discussions)',
               },
               tags: {
                 type: 'array',
@@ -115,13 +115,13 @@ export class LLMemMCPServer {
         },
         {
           name: 'update_context',
-          description: 'Update an existing context',
+          description: 'Update or modify an existing memory. Use when information needs to be corrected or expanded.',
           inputSchema: {
             type: 'object',
             properties: {
               id: {
                 type: 'string',
-                description: 'The UUID of the context to update',
+                description: 'The UUID of the memory to update',
               },
               title: {
                 type: 'string',
@@ -142,13 +142,13 @@ export class LLMemMCPServer {
         },
         {
           name: 'delete_context',
-          description: 'Delete a context by ID',
+          description: 'Delete a memory permanently. Use when information is no longer needed or should be forgotten.',
           inputSchema: {
             type: 'object',
             properties: {
               id: {
                 type: 'string',
-                description: 'The UUID of the context to delete',
+                description: 'The UUID of the memory to delete',
               },
             },
             required: ['id'],
@@ -156,26 +156,35 @@ export class LLMemMCPServer {
         },
         {
           name: 'list_contexts',
-          description: 'List contexts with optional filtering',
+          description: 'List all stored memories with optional filtering. Use to browse or overview what has been remembered.',
           inputSchema: {
             type: 'object',
             properties: {
               type: {
                 type: 'string',
                 enum: ['personal', 'project', 'knowledge', 'conversation'],
-                description: 'Filter by context type (optional)',
+                description: 'Filter by memory type: personal (experiences, thoughts), project (work-related), knowledge (facts, learnings), conversation (past discussions) - optional',
               },
               tags: {
                 type: 'array',
                 items: { type: 'string' },
-                description: 'Filter by tags (optional)',
+                description: 'Filter by specific tags or topics - optional',
               },
               limit: {
                 type: 'number',
-                description: 'Maximum number of results (default: 20)',
+                description: 'Maximum number of memories to return (default: 20)',
                 default: 20,
               },
             },
+            required: [],
+          },
+        },
+        {
+          name: 'sync_memories',
+          description: 'Manually synchronize memories with remote repository. Pulls latest changes and pushes any local changes.',
+          inputSchema: {
+            type: 'object',
+            properties: {},
             required: [],
           },
         },
@@ -192,14 +201,14 @@ export class LLMemMCPServer {
         {
           uri: 'context://recent',
           mimeType: 'application/json',
-          name: 'Recent Contexts',
-          description: 'Recently modified contexts',
+          name: 'Recent Memories',
+          description: 'Recently stored or modified memories',
         },
         {
           uri: 'context://types',
           mimeType: 'application/json',
-          name: 'Context Types',
-          description: 'Available context types and their counts',
+          name: 'Memory Types',
+          description: 'Available memory types and their counts',
         },
       ],
     }));
@@ -227,8 +236,7 @@ export class LLMemMCPServer {
     // Set up a timeout to exit after processing one command
     let commandProcessed = false;
     
-    // Override the request handlers to detect when a command is processed
-    const originalCallTool = this.server.setRequestHandler;
+    // Set up test mode behavior
     
     // Add a small delay and then exit after the first response is sent
     setTimeout(async () => {
@@ -252,8 +260,8 @@ export class LLMemMCPServer {
   async stop(): Promise<void> {
     console.error('Stopping LLMem MCP Server...');
     
-    // Stop file watcher
-    this.contextStore.stopFileWatcher();
+    // Cleanup context store (stops file watcher and background sync)
+    await this.contextStore.cleanup();
     
     // Note: The MCP SDK doesn't provide a clean disconnect method
     // The server will be closed when the process exits
