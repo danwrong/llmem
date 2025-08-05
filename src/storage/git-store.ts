@@ -38,12 +38,10 @@ export class GitStore {
   }
 
   private async createInitialStructure(): Promise<void> {
+    // Create minimal structure - type subdirectories will be created on demand
     const dirs = [
-      'contexts/daily',
-      'contexts/people',
-      'contexts/projects',
-      'contexts/knowledge',
-      '.llmem/cache',
+      'contexts',     // Main contexts directory
+      '.llmem/cache', // Cache directory
     ];
 
     for (const dir of dirs) {
@@ -61,6 +59,37 @@ export class GitStore {
     const { writeFile } = await import('fs/promises');
     await writeFile(join(this.storePath, '.gitignore'), gitignoreContent);
     await this.git.add('.gitignore');
+
+    // Create README if it doesn't exist
+    const readmePath = join(this.storePath, 'README.md');
+    if (!existsSync(readmePath)) {
+      const { readFile: readTemplate } = await import('fs/promises');
+      const { dirname } = await import('path');
+      const { fileURLToPath } = await import('url');
+      const __dirname = dirname(fileURLToPath(import.meta.url));
+      
+      try {
+        const readmeContent = await readTemplate(join(__dirname, 'README-template.md'), 'utf-8');
+        await writeFile(readmePath, readmeContent);
+        await this.git.add('README.md');
+      } catch (error) {
+        // If template not found, create a simple README
+        const simpleReadme = `# Memory Store
+
+This repository contains your personal memories managed by LLMem.
+
+Memories are organized in the \`contexts/\` directory by type:
+- **personal**: Personal experiences and thoughts
+- **project**: Work and project-related memories
+- **knowledge**: Learning and knowledge base
+- **conversation**: Past conversations
+
+Each memory is a Markdown file with YAML frontmatter containing metadata.`;
+        
+        await writeFile(readmePath, simpleReadme);
+        await this.git.add('README.md');
+      }
+    }
   }
 
   async add(filepath: string): Promise<void> {

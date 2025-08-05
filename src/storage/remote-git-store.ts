@@ -1,5 +1,5 @@
 import { simpleGit } from 'simple-git';
-import { mkdir, rm, readdir } from 'fs/promises';
+import { mkdir, rm, readdir, writeFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { getConfig } from '../utils/config.js';
@@ -59,6 +59,9 @@ export class RemoteGitStore extends GitStore {
 
     // 3. Clone from remote
     await this.cloneFromRemote(remoteUrl);
+
+    // 4. Ensure required directory structure exists
+    await this.ensureDirectoryStructure();
 
     console.warn('✅ Successfully replaced local content with remote repository');
   }
@@ -320,5 +323,50 @@ export class RemoteGitStore extends GitStore {
     }
     
     console.warn('✅ Sync completed');
+  }
+
+  private async ensureDirectoryStructure(): Promise<void> {
+    // Only create the contexts directory if it doesn't exist
+    // Individual type subdirectories will be created on-demand when saving memories
+    const contextsDir = join(this.getStorePath(), 'contexts');
+    
+    if (!existsSync(contextsDir)) {
+      await mkdir(contextsDir, { recursive: true });
+      console.warn('📁 Created contexts directory');
+    }
+
+    // Ensure .gitignore exists
+    const gitignorePath = join(this.getStorePath(), '.gitignore');
+    if (!existsSync(gitignorePath)) {
+      const gitignoreContent = `.llmem/vectors.db
+.llmem/cache/
+*.tmp
+*.swp
+.DS_Store`;
+      
+      await writeFile(gitignorePath, gitignoreContent);
+      console.warn('📝 Created .gitignore file');
+    }
+
+    // Ensure README exists
+    const readmePath = join(this.getStorePath(), 'README.md');
+    if (!existsSync(readmePath)) {
+      const simpleReadme = `# Memory Store
+
+This repository contains your personal memories managed by LLMem.
+
+Memories are organized in the \`contexts/\` directory by type:
+- **personal**: Personal experiences and thoughts
+- **project**: Work and project-related memories
+- **knowledge**: Learning and knowledge base
+- **conversation**: Past conversations
+
+Each memory is a Markdown file with YAML frontmatter containing metadata.
+
+This repository was cloned from a remote source and is managed by LLMem.`;
+      
+      await writeFile(readmePath, simpleReadme);
+      console.warn('📄 Created README.md file');
+    }
   }
 }
