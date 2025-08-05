@@ -78,11 +78,10 @@ export class GitStore {
 
 This repository contains your personal memories managed by LLMem.
 
-Memories are organized in the \`contexts/\` directory by type:
-- **personal**: Personal experiences and thoughts
-- **project**: Work and project-related memories
-- **knowledge**: Learning and knowledge base
-- **conversation**: Past conversations
+Memories are organized in the \`contexts/\` directory.
+
+You can organize memories in subdirectories however makes sense to you
+(e.g., by year, topic, project, etc.).
 
 Each memory is a Markdown file with YAML frontmatter containing metadata.`;
         

@@ -103,6 +103,10 @@ export class LLMemMCPServer {
                 enum: ['personal', 'project', 'knowledge', 'conversation'],
                 description: 'Type of memory: personal (experiences, thoughts), project (work-related), knowledge (facts, learnings), conversation (past discussions)',
               },
+              directory: {
+                type: 'string',
+                description: 'Optional subdirectory within contexts/ for organization (e.g., "work/2024", "travel", "recipes"). If not specified, uses type as directory.',
+              },
               tags: {
                 type: 'array',
                 items: { type: 'string' },

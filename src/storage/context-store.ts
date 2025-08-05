@@ -71,10 +71,11 @@ export class ContextStore {
     title: string,
     content: string,
     type: ContextType,
-    metadata?: Partial<ContextMetadata>
+    metadata?: Partial<ContextMetadata>,
+    options?: { directory?: string }
   ): Promise<Context> {
     const context = this.parser.createNewContext(title, content, type, metadata);
-    const filepath = this.generateFilepath(context);
+    const filepath = this.generateFilepath(context, options?.directory);
     
     await this.writeContext(filepath, context);
     
@@ -243,7 +244,7 @@ export class ContextStore {
     await writeFile(filepath, content, 'utf-8');
   }
 
-  private generateFilepath(context: Context): string {
+  private generateFilepath(context: Context, customDirectory?: string): string {
     const { type, title, id } = context.metadata;
     const sanitizedTitle = title
       .toLowerCase()
@@ -252,7 +253,16 @@ export class ContextStore {
       .substring(0, 50);
     
     const filename = `${sanitizedTitle}-${id.substring(0, 8)}.md`;
-    return join(this.gitStore.getStorePath(), 'contexts', type, filename);
+    
+    // Use custom directory if provided, otherwise use type
+    const directory = customDirectory || type;
+    
+    // Sanitize directory path (remove leading/trailing slashes, normalize)
+    const sanitizedDir = directory
+      .replace(/^\/+|\/+$/g, '') // Remove leading/trailing slashes
+      .replace(/\.\./g, ''); // Remove parent directory references for security
+    
+    return join(this.gitStore.getStorePath(), 'contexts', sanitizedDir, filename);
   }
 
   private async findContextFile(id: string): Promise<string | null> {

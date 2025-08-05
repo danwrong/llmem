@@ -6,21 +6,22 @@ This repository contains your personal memories managed by LLMem.
 
 ```
 .
-├── contexts/           # All memories organized by type
-│   ├── personal/      # Personal experiences and thoughts
-│   ├── project/       # Work and project-related memories
-│   ├── knowledge/     # Learning and knowledge base
-│   └── conversation/  # Past conversations and discussions
+├── contexts/           # All memories (organize however you like)
+│   └── [your subdirs] # Create any directory structure that works for you
 ├── .llmem/            # Internal LLMem data (do not edit)
 └── .gitignore         # Git ignore rules
 ```
 
-## Memory Types
+## Organization Tips
 
-- **Personal**: Life experiences, thoughts, reflections, and personal notes
-- **Project**: Work-related information, project details, and professional notes
-- **Knowledge**: Facts, learnings, how-tos, and reference information
-- **Conversation**: Records of important discussions and conversations
+You can organize your memories however makes sense to you:
+- By date: `contexts/2024/january/`
+- By project: `contexts/work/project-x/`
+- By topic: `contexts/recipes/`, `contexts/travel/`
+- By type: `contexts/personal/`, `contexts/knowledge/`
+- Or any combination!
+
+LLMem will find your memories regardless of how you organize them.
 
 ## File Format
 

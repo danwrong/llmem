@@ -117,7 +117,7 @@ export class ToolHandlers {
   }
 
   private async handleAddContext(args: any): Promise<CallToolResult> {
-    const { title, content, type, tags = [] } = args;
+    const { title, content, type, tags = [], directory } = args;
 
     if (!title || typeof title !== 'string') {
       throw new McpError(ErrorCode.InvalidParams, 'Title parameter is required and must be a string');
@@ -135,9 +135,13 @@ export class ToolHandlers {
       throw new McpError(ErrorCode.InvalidParams, 'Tags parameter must be an array');
     }
 
-    const newContext = await this.contextStore.create(title, content, type as ContextType, {
-      tags,
-    });
+    const newContext = await this.contextStore.create(
+      title, 
+      content, 
+      type as ContextType, 
+      { tags },
+      directory ? { directory } : undefined
+    );
 
     return {
       content: [
