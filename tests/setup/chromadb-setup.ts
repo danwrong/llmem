@@ -5,7 +5,7 @@ export class ChromaDBTestServer {
   private process: ChildProcess | null = null;
   private port: number;
 
-  constructor(port: number = 8765) {
+  constructor(port: number = 8766) {
     this.port = port;
   }
 
@@ -17,8 +17,9 @@ export class ChromaDBTestServer {
     // Try to start ChromaDB in a subprocess
     console.log(`Starting ChromaDB test server on port ${this.port}...`);
     
-    this.process = spawn('python', ['-m', 'chromadb.cli', 'run', '--host', 'localhost', '--port', this.port.toString(), '--path', './test-chromadb'], {
-      stdio: 'pipe'
+    this.process = spawn('npx', ['chromadb', 'run', '--host', 'localhost', '--port', this.port.toString(), '--path', './test-chromadb'], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      shell: true
     });
 
     if (!this.process) {
@@ -28,6 +29,14 @@ export class ChromaDBTestServer {
     // Handle process errors
     this.process.on('error', (error) => {
       console.error('ChromaDB process error:', error);
+    });
+
+    this.process.stdout?.on('data', (data) => {
+      console.log('ChromaDB stdout:', data.toString());
+    });
+
+    this.process.stderr?.on('data', (data) => {
+      console.error('ChromaDB stderr:', data.toString());
     });
 
     this.process.on('exit', (code) => {
@@ -57,22 +66,24 @@ export class ChromaDBTestServer {
     this.process = null;
   }
 
-  private async waitForReady(maxAttempts: number = 30): Promise<void> {
+  private async waitForReady(maxAttempts: number = 15): Promise<void> {
     for (let i = 0; i < maxAttempts; i++) {
       try {
-        const response = await fetch(`http://localhost:${this.port}/api/v1/heartbeat`);
+        // Try ChromaDB v2 endpoints
+        const response = await fetch(`http://localhost:${this.port}/api/v2/heartbeat`);
         if (response.ok) {
-          console.log('ChromaDB test server is ready');
+          console.log('ChromaDB test server is ready (v2 heartbeat)');
           return;
         }
       } catch (error) {
-        // ChromaDB not ready yet
+        // ChromaDB not ready yet, wait and retry
+        console.log(`Attempt ${i + 1}/${maxAttempts}: ChromaDB not ready yet...`);
       }
       
-      await setTimeout(1000); // Wait 1 second before next attempt
+      await setTimeout(2000); // Wait 2 seconds before next attempt
     }
     
-    throw new Error(`ChromaDB failed to start after ${maxAttempts} seconds`);
+    throw new Error(`ChromaDB failed to start after ${maxAttempts * 2} seconds`);
   }
 
   isRunning(): boolean {
@@ -95,7 +106,7 @@ export async function setupChromaDBForTests(): Promise<void> {
   console.log('Setting up real ChromaDB for integration tests');
   
   if (!globalTestServer) {
-    globalTestServer = new ChromaDBTestServer(8765);
+    globalTestServer = new ChromaDBTestServer(8766);
   }
 
   if (!globalTestServer.isRunning()) {

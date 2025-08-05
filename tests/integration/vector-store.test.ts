@@ -1,11 +1,24 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { VectorStore } from '../../src/storage/vector-store.js';
 import { Context } from '../../src/models/context.js';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { mkdtemp, rm } from 'fs/promises';
 
-// NO MOCKS - This is an integration test that requires real ChromaDB
+// Integration test - uses real ChromaDB on test port 8766
+vi.mock('../../src/utils/config.js', () => ({
+  getConfig: () => ({
+    chromaDbPort: 8766, // Use test ChromaDB port
+    storePath: '/tmp/test-chromadb',
+    remoteUrl: null,
+    authType: null,
+    authToken: null,
+    autoSync: false,
+    syncInterval: 30,
+    autoCommit: true,
+    autoIndex: true
+  })
+}));
 
 describe('VectorStore Integration Tests', () => {
   let vectorStore: VectorStore;

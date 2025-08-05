@@ -3,7 +3,7 @@ import { isUsingRealChromaDB } from './chromadb-setup.js';
 
 export function createMockConfig(overrides: Record<string, any> = {}) {
   return {
-    chromaDbPort: 8765,
+    chromaDbPort: isUsingRealChromaDB() ? 8766 : 8765,
     remoteUrl: null,
     authType: null,
     authToken: null,

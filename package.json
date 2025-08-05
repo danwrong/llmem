@@ -10,7 +10,7 @@
     "start": "node dist/index.js",
     "mcp": "tsx src/index.ts",
     "mcp:test": "tsx src/index.ts --test",
-    "test": "vitest run",
+    "test": "npm run test:unit && npm run test:integration",
     "test:unit": "vitest run src/**/*.test.ts tests/unit/**/*.test.ts tests/hybrid-search.test.ts",
     "test:integration": "LLMEM_TEST_REAL_CHROMADB=true vitest run tests/integration/**",
     "test:watch": "vitest watch",
