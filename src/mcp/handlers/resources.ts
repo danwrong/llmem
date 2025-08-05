@@ -1,6 +1,5 @@
 import { ReadResourceRequest, ReadResourceResult, ErrorCode, McpError } from '@modelcontextprotocol/sdk/types.js';
 import { ContextStore } from '../../storage/context-store.js';
-import { ContextType } from '../../models/context.js';
 
 export class ResourceHandlers {
   constructor(private contextStore: ContextStore) {}
@@ -60,18 +59,13 @@ export class ResourceHandlers {
   private async handleMemoryTypes(): Promise<ReadResourceResult> {
     const memories = await this.contextStore.list();
     
-    // Count memories by type
-    const typeCounts: Record<ContextType, number> = {
-      personal: 0,
-      project: 0,
-      knowledge: 0,
-      conversation: 0,
-    };
-
+    // Count memories by type (now flexible directory paths)
+    const typeCounts: Record<string, number> = {};
     const tagCounts: Record<string, number> = {};
 
     memories.forEach(ctx => {
-      typeCounts[ctx.metadata.type]++;
+      const type = ctx.metadata.type;
+      typeCounts[type] = (typeCounts[type] || 0) + 1;
       
       ctx.metadata.tags.forEach(tag => {
         tagCounts[tag] = (tagCounts[tag] || 0) + 1;

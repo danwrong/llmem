@@ -1,6 +1,5 @@
 import { CallToolRequest, CallToolResult, ErrorCode, McpError } from '@modelcontextprotocol/sdk/types.js';
 import { ContextStore } from '../../storage/context-store.js';
-import { ContextType } from '../../models/context.js';
 
 export class ToolHandlers {
   constructor(private contextStore: ContextStore) {}
@@ -117,7 +116,7 @@ export class ToolHandlers {
   }
 
   private async handleAddContext(args: any): Promise<CallToolResult> {
-    const { title, content, type, tags = [], directory } = args;
+    const { title, content, type, tags = [] } = args;
 
     if (!title || typeof title !== 'string') {
       throw new McpError(ErrorCode.InvalidParams, 'Title parameter is required and must be a string');
@@ -127,8 +126,8 @@ export class ToolHandlers {
       throw new McpError(ErrorCode.InvalidParams, 'Content parameter is required and must be a string');
     }
 
-    if (!type || !['personal', 'project', 'knowledge', 'conversation'].includes(type)) {
-      throw new McpError(ErrorCode.InvalidParams, 'Type parameter is required and must be one of: personal, project, knowledge, conversation');
+    if (!type || typeof type !== 'string') {
+      throw new McpError(ErrorCode.InvalidParams, 'Type parameter is required and must be a string representing the directory path');
     }
 
     if (!Array.isArray(tags)) {
@@ -138,9 +137,8 @@ export class ToolHandlers {
     const newContext = await this.contextStore.create(
       title, 
       content, 
-      type as ContextType, 
-      { tags },
-      directory ? { directory } : undefined
+      type, // Now just a string directory path
+      { tags }
     );
 
     return {

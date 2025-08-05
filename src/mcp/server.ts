@@ -53,8 +53,7 @@ export class LLMemMCPServer {
               },
               type: {
                 type: 'string',
-                enum: ['personal', 'project', 'knowledge', 'conversation'],
-                description: 'Filter by memory type: personal (experiences, thoughts), project (work-related), knowledge (facts, learnings), conversation (past discussions) - optional',
+                description: 'Filter by memory type/directory path (e.g., "personal", "work/2024", "travel/japan") - optional',
               },
               tags: {
                 type: 'array',
@@ -100,12 +99,7 @@ export class LLMemMCPServer {
               },
               type: {
                 type: 'string',
-                enum: ['personal', 'project', 'knowledge', 'conversation'],
-                description: 'Type of memory: personal (experiences, thoughts), project (work-related), knowledge (facts, learnings), conversation (past discussions)',
-              },
-              directory: {
-                type: 'string',
-                description: 'Optional subdirectory path for organizing this memory (e.g., "2024/january", "work/project-x", "travel/japan", "recipes/desserts"). Use forward slashes for nested directories. The LLM should intelligently choose directories based on the content - for example, a memory about a trip to Tokyo could go in "travel/japan/2024" or "2024/travel/tokyo". If not specified, defaults to the memory type (personal/project/knowledge/conversation).',
+                description: 'Directory path for organizing this memory (e.g., "personal", "work/2024", "travel/japan", "recipes/desserts", "projects/llmem"). Use forward slashes for nested directories. The LLM should intelligently choose directories based on the content - for example, a memory about a trip to Tokyo could go in "travel/japan/2024" or "2024/travel/tokyo". Common patterns: personal, work/[project], travel/[location], knowledge/[topic], daily/[date].',
               },
               tags: {
                 type: 'array',
@@ -166,8 +160,7 @@ export class LLMemMCPServer {
             properties: {
               type: {
                 type: 'string',
-                enum: ['personal', 'project', 'knowledge', 'conversation'],
-                description: 'Filter by memory type: personal (experiences, thoughts), project (work-related), knowledge (facts, learnings), conversation (past discussions) - optional',
+                description: 'Filter by memory type/directory path (e.g., "personal", "work/2024", "travel/japan") - optional',
               },
               tags: {
                 type: 'array',

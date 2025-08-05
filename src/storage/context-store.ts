@@ -7,7 +7,7 @@ import { MarkdownParser } from './markdown-parser.js';
 import { VectorStore } from './vector-store.js';
 import { HybridSearch, SearchResult } from './hybrid-search.js';
 import { FileWatcher } from './file-watcher.js';
-import { Context, ContextMetadata, ContextType } from '../models/context.js';
+import { Context, ContextMetadata } from '../models/context.js';
 import { getConfig } from '../utils/config.js';
 
 export class ContextStore {
@@ -70,12 +70,11 @@ export class ContextStore {
   async create(
     title: string,
     content: string,
-    type: ContextType,
-    metadata?: Partial<ContextMetadata>,
-    options?: { directory?: string }
+    type: string, // Now a flexible directory path
+    metadata?: Partial<ContextMetadata>
   ): Promise<Context> {
     const context = this.parser.createNewContext(title, content, type, metadata);
-    const filepath = this.generateFilepath(context, options?.directory);
+    const filepath = this.generateFilepath(context);
     
     await this.writeContext(filepath, context);
     
@@ -156,7 +155,7 @@ export class ContextStore {
   }
 
   async list(filter?: {
-    type?: ContextType;
+    type?: string;
     tags?: string[];
   }): Promise<Context[]> {
     const contextsDir = join(this.gitStore.getStorePath(), 'contexts');
@@ -244,7 +243,7 @@ export class ContextStore {
     await writeFile(filepath, content, 'utf-8');
   }
 
-  private generateFilepath(context: Context, customDirectory?: string): string {
+  private generateFilepath(context: Context): string {
     const { type, title, id } = context.metadata;
     const sanitizedTitle = title
       .toLowerCase()
@@ -254,11 +253,8 @@ export class ContextStore {
     
     const filename = `${sanitizedTitle}-${id.substring(0, 8)}.md`;
     
-    // Use custom directory if provided, otherwise use type
-    const directory = customDirectory || type;
-    
     // Sanitize directory path (remove leading/trailing slashes, normalize)
-    const sanitizedDir = directory
+    const sanitizedDir = type
       .replace(/^\/+|\/+$/g, '') // Remove leading/trailing slashes
       .replace(/\.\./g, ''); // Remove parent directory references for security
     
